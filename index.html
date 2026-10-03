@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manizales al Día — Noticias de la ciudad</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --fondo: #0E1611;
+    --panel: #152019;
+    --tinta: #F2EDE3;
+    --tinta-suave: #B9C4B6;
+    --linea: #2A3A2E;
+    --ambar: #E4B45A;
+    --rojo: #C7432B;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { color-scheme: dark; }
+  ::selection { background: var(--ambar); color: var(--fondo); }
+  body {
+    background: var(--fondo);
+    color: var(--tinta);
+    font-family: 'Public Sans', sans-serif;
+    line-height: 1.65;
+  }
+  ::-webkit-scrollbar { width: 10px; }
+  ::-webkit-scrollbar-track { background: var(--fondo); }
+  ::-webkit-scrollbar-thumb { background: var(--linea); }
+  .contenedor { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+
+  /* Cabecera */
+  header.masthead {
+    border-bottom: 1px solid var(--linea);
+    padding: 34px 0 26px;
+  }
+  .fecha {
+    font-family: 'Public Sans', sans-serif;
+    font-size: 13px; letter-spacing: 1px;
+    color: var(--ambar);
+  }
+  h1.marca {
+    font-family: 'Fraunces', serif; font-weight: 900;
+    font-size: clamp(42px, 7vw, 72px);
+    line-height: 1.02; letter-spacing: -0.02em;
+    margin: 8px 0 6px;
+  }
+  .lema { color: var(--tinta-suave); font-family: Georgia, serif; font-style: italic; font-size: 15px; }
+
+  nav.categorias {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    padding: 16px 0; border-bottom: 1px solid var(--linea);
+  }
+  nav.categorias button {
+    font-family: 'Public Sans', sans-serif; font-size: 13px; font-weight: 600;
+    background: transparent; color: var(--tinta-suave);
+    border: 1px solid var(--linea); border-radius: 0;
+    padding: 6px 14px; cursor: pointer;
+    transition: background .18s ease-out, color .18s ease-out, border-color .18s ease-out;
+  }
+  nav.categorias button:hover { border-color: var(--ambar); color: var(--ambar); }
+  nav.categorias button.activo { background: var(--ambar); border-color: var(--ambar); color: var(--fondo); }
+  nav.categorias button:focus-visible, a:focus-visible { outline: 2px solid var(--ambar); outline-offset: 2px; }
+
+  .hero { padding: 36px 0 30px; border-bottom: 1px solid var(--linea); }
+  .etiqueta {
+    display: inline-block; background: var(--rojo); color: #FFF6EA;
+    font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+    padding: 4px 10px; margin-bottom: 14px;
+  }
+  .hero h2 {
+    font-family: 'Fraunces', serif; font-weight: 900; letter-spacing: -0.015em;
+    font-size: clamp(30px, 4.6vw, 50px); line-height: 1.1; max-width: 22ch;
+  }
+  .hero p { margin-top: 14px; max-width: 66ch; color: var(--tinta-suave); font-size: 17px; }
+  .hero p::first-letter {
+    font-family: 'Fraunces', serif; font-weight: 900; font-size: 3.1em;
+    float: left; line-height: .85; padding-right: 10px; color: var(--ambar);
+  }
+  .meta { display: block; margin-top: 12px; font-size: 12.5px; letter-spacing: .5px; color: #77836F; }
+
+  .seccion-titulo {
+    font-family: 'Fraunces', serif; font-weight: 700; font-size: 24px;
+    margin: 34px 0 20px; padding-bottom: 8px;
+    border-bottom: 1px solid var(--linea);
+  }
+  .grilla { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1px; background: var(--linea); border-top: 1px solid var(--linea); }
+  article.tarjeta { background: var(--fondo); padding: 20px 18px 22px; border-top: 3px solid var(--panel); transition: background .18s ease-out, border-color .18s ease-out; }
+  article.tarjeta:hover { background: var(--panel); border-top-color: var(--ambar); }
+  article.tarjeta .cat { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--ambar); }
+  article.tarjeta h3 { font-family: 'Fraunces', serif; font-weight: 700; font-size: 21px; line-height: 1.25; margin: 8px 0 8px; }
+  article.tarjeta p { font-size: 14.5px; color: var(--tinta-suave); }
+  article.tarjeta.oculto { display: none; }
+  .tarjeta-finca { background: var(--panel); border-top: 3px solid var(--ambar); }
+  .tarjeta-finca:hover { background: #1A281D; }
+  .boton-instagram {
+    display: inline-block; margin-top: 14px;
+    background: var(--ambar); color: var(--fondo); text-decoration: none;
+    font-weight: 700; font-size: 13px; letter-spacing: .5px;
+    padding: 9px 16px;
+    transition: background .18s ease-out;
+  }
+  .boton-instagram:hover { background: #F0C877; }
+  .sin-resultados { padding: 30px 0; color: var(--tinta-suave); }
+
+  footer {
+    border-top: 1px solid var(--linea); margin-top: 40px;
+    padding: 24px 0 44px; font-size: 13px; color: #77836F;
+  }
+  a { color: var(--ambar); }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="contenedor">
+    <span class="fecha">Manizales, Caldas · Viernes 2 de octubre de 2026</span>
+    <h1 class="marca">Manizales al Día</h1>
+    <p class="lema">La ciudad de las puertas abiertas, contada desde sus noticias.</p>
+  </div>
+</header>
+
+<main class="contenedor">
+  <nav class="categorias" id="filtros" aria-label="Filtrar por categoría">
+    <button data-cat="todas" class="activo">Todas</button>
+    <button data-cat="ciudad">Ciudad</button>
+    <button data-cat="educacion">Educación</button>
+    <button data-cat="economia">Economía</button>
+    <button data-cat="turismo">Turismo</button>
+    <button data-cat="politica">Política</button>
+    <button data-cat="seguridad">Seguridad</button>
+  </nav>
+
+  <section class="hero">
+    <span class="etiqueta">Última hora</span>
+    <h2 id="heroTitulo">La Catedral construye bases para apuntalar su torre de 500 toneladas dañada por el terremoto</h2>
+    <p id="heroResumen">Desde hace dos semanas avanzan los trabajos con dos caissons de ocho metros de profundidad. El desmonte de la torre nororiental, colapsada el 10 de agosto, tardaría al menos cinco meses; el templo permanecería cerrado durante ese periodo.</p>
+    <span class="meta" id="heroMeta">Fuente: La Patria · 30 sep 2026 · Redacción Manizales</span>
+    <span class="meta" id="actualizado" style="color:var(--ambar)"></span>
+  </section>
+
+  <h2 class="seccion-titulo">Las noticias de la semana</h2>
+  <div class="grilla" id="grilla">
+
+    <article class="tarjeta" data-cat="ciudad">
+      <span class="cat">Ciudad</span>
+      <h3>La Catedral construye bases para apuntalar su torre de 500 toneladas dañada por el terremoto</h3>
+      <p>Desde hace dos semanas avanzan los trabajos con dos caissons de ocho metros de profundidad. El desmonte de la torre nororiental, colapsada el 10 de agosto, tardaría al menos cinco meses.</p>
+      <span class="meta">Fuente: La Patria · 30 sep 2026</span>
+    </article>
+
+    <article class="tarjeta" data-cat="ciudad">
+      <span class="cat">Ciudad</span>
+      <h3>Donaciones para reparar viviendas entran en nueva etapa</h3>
+      <p>El acopio de alimentos terminó y ahora se necesitan tejas, ladrillos, cemento y perfiles para la autorreparación de viviendas con daños menores. Las entregas se reciben en la bodega de Aguas de Manizales.</p>
+      <span class="meta">Fuente: Eje21 · 1 oct 2026</span>
+    </article>
+
+    <article class="tarjeta" data-cat="educacion">
+      <span class="cat">Educación</span>
+      <h3>Regularán el uso de celulares en colegios desde 2027</h3>
+      <p>El decreto 0326 de 2026 obliga a las instituciones a definir en su manual de convivencia las reglas sobre celulares y dispositivos. Habrá excepciones por salud, inclusión, seguridad y uso pedagógico supervisado.</p>
+      <span class="meta">Fuente: Caracol Radio · 1 oct 2026</span>
+    </article>
+
+    <article class="tarjeta" data-cat="economia">
+      <span class="cat">Economía</span>
+      <h3>La Galería vuelve a latir: agenda de octubre en Manizales</h3>
+      <p>El primer "Viernes de Plaza" será este 2 de octubre, seguido del Café Fest en Expoferias y la Semana de la Mujer del Alma. En noviembre llegará la quinta Feria Empresarial y de Emprendimiento.</p>
+      <span class="meta">Fuente: Mi Manizales del Alma · 1 oct 2026</span>
+    </article>
+
+    <article class="tarjeta" data-cat="turismo">
+      <span class="cat">Turismo</span>
+      <h3>Manizales se reactiva de la mano del turismo</h3>
+      <p>El 95 % de la actividad vuelve a operar. La gastronomía local suma 1.741 negocios y más de 12.800 empleos, el MZL Café Fest reunió a 20.324 asistentes y el aeropuerto La Nubia registra 91,6 % de operatividad.</p>
+      <span class="meta">Fuente: Noticias RCN · 30 sep 2026</span>
+    </article>
+
+    <article class="tarjeta" data-cat="turismo">
+      <span class="cat">Turismo</span>
+      <h3>Café Fest 2026 regresa a Expoferias del 2 al 4 de octubre</h3>
+      <p>Tras las adecuaciones por el sismo del 10 de agosto, el certamen del café reúne a 180 expositores seleccionados de más de 250 inscritos, con experiencias sensoriales, concursos y una Coffee Party.</p>
+      <span class="meta">Fuente: BC Noticias · 25 sep 2026</span>
+    </article>
+
+    <article class="tarjeta" data-cat="turismo">
+      <span class="cat">Turismo</span>
+      <h3>58° Festival Internacional de Teatro hasta el 4 de octubre</h3>
+      <p>Nueve días de teatro de sala y de calle, títeres y espectáculos infantiles, con obras destacadas como "Hoy no estrenamos" y "Me llamo Suleimán", más el 8° Congreso Iberoamericano de Teatro.</p>
+      <span class="meta">Fuente: XUe Turismo · 24 ago 2026</span>
+    </article>
+
+    <article class="tarjeta" data-cat="turismo">
+      <span class="cat">Turismo</span>
+      <h3>Turismo, motor para la recuperación de Manizales</h3>
+      <p>A un mes del terremoto el 97 % del comercio había reabierto. La apuesta ahora es recuperar la confianza del viajero con oferta de Centro Histórico, cafés especiales, aguas termales y el Parque Los Nevados.</p>
+      <span class="meta">Fuente: Eje21 · 27 sep 2026</span>
+    </article>
+
+    <article class="tarjeta tarjeta-finca" data-cat="turismo">
+      <span class="cat">Turismo · Destino destacado</span>
+      <h3>Finca Altamira: descanso cafetero a 10 minutos de la ciudad</h3>
+      <p>En la vereda Guacas del corregimiento agroturístico El Tablazo, esta finca ofrece paisajes de montaña, ambiente cafetero, habitaciones con desayuno incluido y bonitos atardeceres. Teléfono: +57 315 4213708.</p>
+      <a class="boton-instagram" href="https://instagram.com/fincaaltamiramanizales" target="_blank" rel="noopener">Ver en Instagram @fincaaltamiramanizales →</a>
+    </article>
+
+    <article class="tarjeta" data-cat="politica">
+      <span class="cat">Política</span>
+      <h3>Manizales avanza como Distrito Especial del Conocimiento</h3>
+      <p>La Comisión Primera de la Cámara aprobó en primer debate el proyecto que le daría la categoría de Distrito Especial del Conocimiento, la Sostenibilidad y la Innovación, con beneficios directos para Villamaría.</p>
+      <span class="meta">Fuente: Reporteros Asociados · 1 oct 2026</span>
+    </article>
+
+    <article class="tarjeta" data-cat="seguridad">
+      <span class="cat">Seguridad</span>
+      <h3>Capturan a presuntos autores de los atentados del 7 de agosto</h3>
+      <p>Las cámaras de seguridad revelaron los movimientos de alias "Gafas" y "El Rapero", señalados de los dos atentados terroristas ocurridos en Manizales el 7 de agosto. Ambos fueron detenidos tras allanamientos.</p>
+      <span class="meta">Fuente: Noticias UNOA · 25 ago 2026</span>
+    </article>
+
+    <article class="tarjeta" data-cat="ciudad">
+      <span class="cat">Ciudad</span>
+      <h3>Buscan responsables por edificio colapsado en San Jorge</h3>
+      <p>Vecinos exigen detener la demolición sin antes tomar muestras de concreto y vigas de la obra de la calle 46A. La Alcaldía suspendió temporalmente los trabajos hasta practicar las pruebas técnicas.</p>
+      <span class="meta">Fuente: La Patria · 3 sep 2026</span>
+    </article>
+
+    <article class="tarjeta" data-cat="ciudad">
+      <span class="cat">Ciudad</span>
+      <h3>Pico y placa en la vía Manizales–Murillo en Semana Santa</h3>
+      <p>La restricción regirá del 28 de marzo al 5 de abril de 2026 para ordenar el flujo de viajeros hacia los municipios del oriente caldense durante la temporada alta.</p>
+      <span class="meta">Fuente: La Patria · Semana Santa 2026</span>
+    </article>
+
+    <article class="tarjeta" data-cat="ciudad">
+      <span class="cat">Ciudad</span>
+      <h3>Después de las 8:00 p.m. se complica el transporte</h3>
+      <p>Vecinos reclaman soluciones por la reducción de rutas en la noche; las autoridades estudian ajustes al servicio de transporte público de la capital caldense.</p>
+      <span class="meta">Fuente: La Patria · Manizales</span>
+    </article>
+
+    <article class="tarjeta" data-cat="seguridad">
+      <span class="cat">Seguridad</span>
+      <h3>Lo absolvieron tras 5 años de cárcel en Manizales</h3>
+      <p>Había sido condenado por acceso carnal abusivo con menor y un tribunal revocó la sentencia. El caso reabre el debate sobre la revisión de condenas en el Eje Cafetero.</p>
+      <span class="meta">Fuente: La Patria · Manizales</span>
+    </article>
+
+  </div>
+  <p class="sin-resultados" id="sinResultados" hidden>No hay noticias en esta categoría.</p>
+</main>
+
+<footer>
+  <div class="contenedor">
+    <p><strong>Manizales al Día</strong> · Página informativa de demostración. Las noticias pertenecen a los medios citados: La Patria, Eje21, Caracol Radio, Noticias RCN, Reporteros Asociados y Noticias UNOA.</p>
+  </div>
+</footer>
+
+<script>
+  const botones = document.querySelectorAll('#filtros button');
+  const tarjetas = document.querySelectorAll('#grilla .tarjeta');
+  const sinResultados = document.getElementById('sinResultados');
+  const grilla = document.getElementById('grilla');
+  const heroTitulo = document.getElementById('heroTitulo');
+  const heroResumen = document.getElementById('heroResumen');
+  const heroMeta = document.getElementById('heroMeta');
+  const actualizado = document.getElementById('actualizado');
+
+  let categoriaActual = 'todas';
+  let ultimaActualizacion = Date.now();
+
+  function visibles() {
+    const todas = [...document.querySelectorAll('#grilla .tarjeta')];
+    return categoriaActual === 'todas' ? todas : todas.filter(t => t.dataset.cat === categoriaActual);
+  }
+
+  function actualizarHero() {
+    const vis = visibles();
+    if (!vis.length) return;
+    const primero = vis[0];
+    heroTitulo.textContent = primero.querySelector('h3').textContent;
+    heroResumen.textContent = primero.querySelector('p').textContent;
+    heroMeta.textContent = primero.querySelector('.meta').textContent;
+  }
+
+  function rotar() {
+    const vis = visibles();
+    if (vis.length > 1) {
+      const primero = vis[0];
+      const ultimo = vis[vis.length - 1];
+      grilla.insertBefore(primero, ultimo.nextSibling);
+    }
+    actualizarHero();
+    ultimaActualizacion = Date.now();
+  }
+
+  botones.forEach(boton => {
+    boton.addEventListener('click', () => {
+      botones.forEach(b => b.classList.remove('activo'));
+      boton.classList.add('activo');
+      categoriaActual = boton.dataset.cat;
+      let visiblesCount = 0;
+      tarjetas.forEach(t => {
+        const mostrar = categoriaActual === 'todas' || t.dataset.cat === categoriaActual;
+        t.classList.toggle('oculto', !mostrar);
+        if (mostrar) visiblesCount++;
+      });
+      sinResultados.hidden = visiblesCount > 0;
+      actualizarHero();
+      ultimaActualizacion = Date.now();
+    });
+  });
+
+  setInterval(rotar, 15000);
+  setInterval(() => {
+    const seg = Math.floor((Date.now() - ultimaActualizacion) / 1000);
+    actualizado.textContent = 'Actualizado hace ' + seg + ' s · las noticias rotan cada 15 s';
+  }, 1000);
+</script>
+
+</body>
+</html>
