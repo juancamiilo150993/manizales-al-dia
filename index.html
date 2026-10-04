@@ -199,7 +199,7 @@
       <span class="meta">Fuente: Eje21 · 27 sep 2026</span>
     </article>
 
-    <article class="tarjeta tarjeta-finca" data-cat="turismo">
+    <article class="tarjeta tarjeta-finca" id="tarjetaAltamira" data-cat="turismo">
       <span class="cat">Turismo · Destino destacado</span>
       <h3>Finca Altamira: descanso cafetero a 10 minutos de la ciudad</h3>
       <p>En la vereda Guacas del corregimiento agroturístico El Tablazo, esta finca ofrece paisajes de montaña, ambiente cafetero, habitaciones con desayuno incluido y bonitos atardeceres. Teléfono: +57 315 4213708.</p>
@@ -260,20 +260,91 @@
 
 <script>
   const botones = document.querySelectorAll('#filtros button');
-  const tarjetas = document.querySelectorAll('#grilla .tarjeta');
-  const sinResultados = document.getElementById('sinResultados');
   const grilla = document.getElementById('grilla');
+  const sinResultados = document.getElementById('sinResultados');
   const heroTitulo = document.getElementById('heroTitulo');
   const heroResumen = document.getElementById('heroResumen');
   const heroMeta = document.getElementById('heroMeta');
   const actualizado = document.getElementById('actualizado');
+  const tarjetaAltamira = document.getElementById('tarjetaAltamira');
+  const tarjetasFallback = [...grilla.querySelectorAll('.tarjeta:not(#tarjetaAltamira)')].map(t => t.outerHTML).join('');
 
   let categoriaActual = 'todas';
   let ultimaActualizacion = Date.now();
 
+  const REGLAS = [
+    ['turismo', ['turismo', 'turista', 'festival', 'fest', 'teatro', 'café fest', 'hoteles', 'aeropuerto', 'nubia', 'nevados', 'gastronomía', 'visitantes']],
+    ['educacion', ['educación', 'colegio', 'escolar', 'estudiantes', 'universidad', 'docentes', 'celulares en colegios']],
+    ['economia', ['economía', 'empleo', 'comercial', 'comercio', 'ventas', 'empresas', 'emprendimiento', 'exportaciones', 'mercado']],
+    ['politica', ['concejo', 'cámara', 'congreso', 'alcalde', 'gobierno', 'elecciones', 'distrito especial', 'concejal']],
+    ['seguridad', ['homicidio', 'captura', 'atentado', 'cárcel', 'policía', 'judicial', 'violencia', 'crimen', 'delito']]
+  ];
+
+  function clasificar(texto) {
+    const t = texto.toLowerCase();
+    for (const [cat, palabras] of REGLAS) {
+      if (palabras.some(p => t.includes(p))) return cat;
+    }
+    return 'ciudad';
+  }
+
+  function limpiarHTML(html) {
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    return div.textContent.trim();
+  }
+
+  function tarjetaHTML(item) {
+    const resumen = limpiarHTML(item.description || item.content || '').slice(0, 220);
+    const fecha = new Date(item.pubDate).toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' });
+    return `<article class="tarjeta" data-cat="${clasificar(item.title + ' ' + resumen)}">
+      <span class="cat">${etiquetaCat(clasificar(item.title + ' ' + resumen))}</span>
+      <h3>${item.title}</h3>
+      <p>${resumen}…</p>
+      <span class="meta">Fuente: Eje21 · ${fecha} · <a href="${item.link}" target="_blank" rel="noopener" style="color:var(--ambar)">Leer nota completa</a></span>
+    </article>`;
+  }
+
+  function etiquetaCat(c) {
+    return { ciudad: 'Ciudad', educacion: 'Educación', economia: 'Economía', turismo: 'Turismo', politica: 'Política', seguridad: 'Seguridad' }[c];
+  }
+
+  async function cargarNoticias() {
+    try {
+      const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://www.eje21.com.co/feed/');
+      const data = await res.json();
+      if (!data.items || !data.items.length) throw new Error('sin items');
+      // Quitamos todas las tarjetas excepto la de Finca Altamira
+      [...grilla.querySelectorAll('.tarjeta:not(#tarjetaAltamira)')].forEach(t => t.remove());
+      // Insertamos las nuevas; la de Altamira queda visible dentro de Turismo
+      const nuevas = data.items.slice(0, 18).map(tarjetaHTML).join('');
+      grilla.insertAdjacentHTML('afterbegin', nuevas);
+      aplicarCategoria();
+      actualizarHero();
+      ultimaActualizacion = Date.now();
+    } catch (e) {
+      // Sin internet o fallo del servicio: restauramos las noticias locales
+      if (!grilla.querySelector('.tarjeta:not(#tarjetaAltamira)')) {
+        grilla.insertAdjacentHTML('afterbegin', tarjetasFallback);
+      }
+      aplicarCategoria();
+      actualizarHero();
+    }
+  }
+
   function visibles() {
-    const todas = [...document.querySelectorAll('#grilla .tarjeta')];
+    const todas = [...grilla.querySelectorAll('.tarjeta')];
     return categoriaActual === 'todas' ? todas : todas.filter(t => t.dataset.cat === categoriaActual);
+  }
+
+  function aplicarCategoria() {
+    let count = 0;
+    grilla.querySelectorAll('.tarjeta').forEach(t => {
+      const mostrar = categoriaActual === 'todas' || t.dataset.cat === categoriaActual;
+      t.classList.toggle('oculto', !mostrar);
+      if (mostrar) count++;
+    });
+    sinResultados.hidden = count > 0;
   }
 
   function actualizarHero() {
@@ -282,7 +353,7 @@
     const primero = vis[0];
     heroTitulo.textContent = primero.querySelector('h3').textContent;
     heroResumen.textContent = primero.querySelector('p').textContent;
-    heroMeta.textContent = primero.querySelector('.meta').textContent;
+    heroMeta.innerHTML = primero.querySelector('.meta').innerHTML;
   }
 
   function rotar() {
@@ -301,18 +372,14 @@
       botones.forEach(b => b.classList.remove('activo'));
       boton.classList.add('activo');
       categoriaActual = boton.dataset.cat;
-      let visiblesCount = 0;
-      tarjetas.forEach(t => {
-        const mostrar = categoriaActual === 'todas' || t.dataset.cat === categoriaActual;
-        t.classList.toggle('oculto', !mostrar);
-        if (mostrar) visiblesCount++;
-      });
-      sinResultados.hidden = visiblesCount > 0;
+      aplicarCategoria();
       actualizarHero();
       ultimaActualizacion = Date.now();
     });
   });
 
+  cargarNoticias();
+  setInterval(cargarNoticias, 3600000); // refresca el feed cada hora
   setInterval(rotar, 15000);
   setInterval(() => {
     const seg = Math.floor((Date.now() - ultimaActualizacion) / 1000);
